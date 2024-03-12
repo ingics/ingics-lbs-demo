@@ -1,4 +1,6 @@
 import Vue from 'vue'
 import axios from 'axios'
 
-Vue.prototype.$axios = axios
+export default ({ app }) => {
+    app.config.globalProperties.$axios = axios
+}

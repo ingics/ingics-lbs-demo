@@ -88,6 +88,7 @@ export default {
             }
         }
     },
+    emits: [ 'save' ],
     data() {
         return {
             newApp: 'mqtt',
@@ -127,11 +128,12 @@ export default {
             this.dialogValue = v
         },
         dialogValue(v) {
-            this.$emit('input', v)
+            this.$emit('update:model-value', v)
         }
     },
     methods: {
         saveSetting() {
+            console.log('saveSetting')
             this.$emit('save', {
                 app: this.newApp,
                 name: this.newName.trim(),

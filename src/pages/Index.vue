@@ -19,7 +19,7 @@
                 v-model="bgImgFile"
                 outlined
                 label="Upload Background Image"
-                @input="handleBgImg"
+                @update:model-value="handleBgImg"
             >
                 <template v-slot:prepend>
                     <q-icon name="attach_file" />
@@ -136,7 +136,7 @@ export default {
         },
         handleBgImg(e) {
             let reader = new FileReader()
-            reader.onload = () => (this.bgImgSrc = reader.result)
+            reader.onload = (r, ev) => { this.bgImgSrc = reader.result }
             reader.readAsDataURL(this.bgImgFile)
         },
         addGateway(e) {
@@ -148,6 +148,7 @@ export default {
             this.currentCfgDialog = true
         },
         saveGatewaySetting(cfg) {
+            console.log("saveGatewaySetting", cfg)
             if (this.currentCfg) {
                 console.log(this.currentCfg.id)
                 this.setGateway({ ...cfg, id: this.currentCfg.id })
@@ -200,7 +201,7 @@ export default {
             }
         }
     },
-    destroyed() {
+    unmounted() {
         window.removeEventListener('resize', this.handleWindowResizing)
     }
 }

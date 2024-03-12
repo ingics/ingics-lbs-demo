@@ -7,6 +7,8 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 
+const ESLintPlugin = require('eslint-webpack-plugin')
+
 module.exports = function (/* ctx */) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
@@ -46,6 +48,15 @@ module.exports = function (/* ctx */) {
     build: {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
+      // added follow Quasar1 -> Quasar2 migration guide
+      chainWebpack (chain) {
+        chain
+          .plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
+          const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
+          chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin)
+      },
+
       // transpile: false,
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
@@ -64,13 +75,21 @@ module.exports = function (/* ctx */) {
 
       // https://quasar.dev/quasar-cli/handling-webpack
       extendWebpack (cfg) {
-cfg.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /node_modules/
-        })
-      },
+        cfg.resolve.fallback = {
+          fs: false,
+          os: false,
+          path: false
+        }
+      }
+
+//       extendWebpack (cfg) {
+// cfg.module.rules.push({
+//           enforce: 'pre',
+//           test: /\.(js|vue)$/,
+//           loader: 'eslint-loader',
+//           exclude: /node_modules/
+//         })
+//       },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
@@ -83,7 +102,7 @@ cfg.module.rules.push({
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
       iconSet: 'material-icons', // Quasar icon set
-      lang: 'en-us', // Quasar language pack
+      lang: 'en-US', // Quasar language pack
       config: {},
 
       // Possible values for "importStrategy":
@@ -179,13 +198,21 @@ cfg.module.rules.push({
         appId: 'ingics-lbs-demo'
       },
 
-      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-      nodeIntegration: true,
+      chainWebpackMain (chain) {
+        chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
+      },
 
-      extendWebpack (/* cfg */) {
-        // do something with Electron main process Webpack cfg
-        // chainWebpack also available besides this extendWebpack
-      }
+      // was renamed from extendWebpack()
+      extendWebpackMain (cfg) { /* ... */ },
+
+      chainWebpackPreload (chain) {
+        chain.plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
+      },
+
+      // New!
+      extendWebpackPreload (cfg) { /* ... */ }
     }
   }
 }

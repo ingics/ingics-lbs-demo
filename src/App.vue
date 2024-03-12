@@ -1,15 +1,14 @@
 <template>
-    <div id="q-app">
-        <router-view />
-    </div>
+    <router-view />
 </template>
 
 <script>
-export default {
+import { defineComponent } from 'vue';
+export default defineComponent({
     name: 'App',
     preFetch({ store }) {
         store.commit('gateway/init')
         store.commit('floorplan/init')
     }
-}
+})
 </script>
