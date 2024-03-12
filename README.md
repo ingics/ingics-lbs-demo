@@ -1,4 +1,8 @@
-# Ingics LBS Demo (ingics-lbs-demo)
+# Deprecated
+
+with Quasar V1 and NodeJS v12.
+
+## Ingics LBS Demo (ingics-lbs-demo)
 
 LBS demostration with iGSXX.
 
@@ -19,7 +23,7 @@ npm install
 quasar dev -m electron
 ```
 
-### Qucik Start Up 
+### Qucik Start Up
 
 1. Update background image (floorplan image)
 2. Setup the image scale (real width & height)
