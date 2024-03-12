@@ -1,5 +1,8 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron'
+import net from 'net'
 import path from 'path'
+import mqtt from 'mqtt'
+import { connect } from 'http2'
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
@@ -56,7 +59,83 @@ function createWindow () {
 // try to disable htto cache
 app.commandLine.appendSwitch('disable-http-cache')
 
-app.on('ready', createWindow)
+const connections = {}
+
+function mqttConnect(id, url, topic) {
+  const client = mqtt.connect(url)
+  client.on('connect', () => {
+    console.log('mqtt-connect', id, 'connected')
+    mainWindow.webContents.send('connect', id)
+    client.subscribe(topic)
+    connections[id] = client
+  })
+  client.on('message', (topic, payload) => {
+    // console.log('mqtt-message', id, payload.toString())
+    mainWindow.webContents.send('message', id, payload.toString())
+  })
+  client.on('close', () => {
+    console.log('mqtt-close', id)
+    if (id in connections) {
+      delete connections[id]
+    }
+    mainWindow.webContents.send('close', id)
+  })
+  client.on('error', (e) => {
+    console.log('mqtt-error', id, e)
+    mainWindow.webContents.send('error', id, e)
+  })
+}
+
+function m2mConnect(id, host, port) {
+  const socket = new net.Socket()
+  socket.on('connect', () => {
+    console.log('m2m-connect', id, 'connected')
+    mainWindow.webContents.send('connect', id)
+    const rl = readline.createInterface({ input: socket })
+    rl.on('line', line => {
+      console.log('m2m-message', id, line.trim())
+      mainWindow.webContents.send('message', id, line.trim())
+    })
+    connections[id] = socket
+  })
+  socket.on('close', () => {
+    console.log('m2m-close', id)
+    if (id in connections) {
+      delete connections[id]
+    }
+    mainWindow.webContents.send('close', id)
+  })
+  socket.on('timeout', () => {
+    console.log('m2m-timeout', id)
+    mainWindow.webContents.send('error', id, 'timeout')
+  })
+  socket.on('error', (e) => {
+    console.log('m2m-error', id, e)
+    mainWindow.webContents.send('error', id, e)
+  })
+  socket.connect(port, host)
+}
+
+app.on('ready', () => {
+
+  ipcMain.on('connect', (event, { id, host, port, topic }) => {
+    console.log('backend-connect', { id, host, port, topic })
+    if (topic) {
+      mqttConnect(id, `mqtt://${host}:${port}`, topic)
+    } else {
+      m2mConnect(id, host, port)
+    }
+  })
+
+  ipcMain.on('disconnect', (event, id) => {
+    console.log('backend-disconnect', id)
+    if (id in connections) {
+      connections[id].end()
+    }
+  })
+
+  createWindow()
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

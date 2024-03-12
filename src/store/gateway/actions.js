@@ -1,6 +1,3 @@
-import net from 'net'
-import mqtt from 'mqtt'
-import readline from 'readline'
 import { parseMessage } from '@ingics/message-parser'
 
 const connections = {}
@@ -21,82 +18,51 @@ function handleMessage(commit, gwid, payload) {
     })
 }
 
-function mqttConnect(commit, gw) {
-    let { id, host, port, topic } = gw
-    // console.log('gateway/mqttConnect', id, host, port, topic)
+window.backend.onConnect(id => {
+    console.log('backend-onConnect', id)
     if (id in connections) {
-        // client already exists
-        return
-    } else {
-        let client = mqtt.connect({ host, port })
-        client.on('connect', function() {
-            // console.log('gateway/mqttConnect', id, 'connected')
-            connections[id] = client
-            client.subscribe(topic)
-        })
-        client.on('message', function(topic, payload) {
-            handleMessage(commit, id, payload.toString())
-        })
-        client.on('close', function() {
-            // console.log('gateway/mqttConnect', id, 'closed')
-            if (id in connections) {
-                delete connections[id]
-            }
-        })
-        client.on('error', function(e) {
-            // console.log('gateway/mqttConnect', id, 'error', e)
-        })
+        connections[id].connected = true
     }
-}
+})
 
-function m2mConnect(commit, gw) {
-    let { id, host, port } = gw
-    // console.log('gateway/m2mConnect', id, host, port)
+window.backend.onMessage(({id, message}) => {
+    // console.log('backend-onMessage', id, message)
     if (id in connections) {
-        // client already exists
-        return
-    } else {
-        let client = new net.Socket()
-        client.on('connect', function() {
-            // console.log('gateway/m2mConnect', id, 'connected')
-            connections[id] = client
-            let rl = readline.createInterface({ input: client })
-            rl.on('line', line => {
-                handleMessage(commit, id, line.trim())
-            })
-        })
-        client.on('close', function() {
-            // console.log('gateway/m2mConnect', id, 'closed')
-            if (id in connections) {
-                delete connections[id]
-            }
-        })
-        client.on('timeout', function() {
-            // console.log('gateway/m2mConnect', id, 'timeout')
-        })
-        client.on('error', function(e) {
-            // console.log('gateway/m2mConnect', id, 'error', e)
-        })
-        client.connect(port, host)
+        handleMessage(connections[id].commit, id, message)
     }
-}
+})
+
+window.backend.onClose((id) => {
+    console.log('backend-onClose', id)
+    if (id in connections) {
+        delete connections[id]
+    }
+})
+
+window.backend.onError((id, error) => {
+    console.log('backend-onError', id, error)
+})
 
 export function connect({ commit, state }, { id }) {
     // console.log('gateway/connect', id)
     let gw = state.list.find(v => v.id === id)
     if (gw) {
-        if (gw.app === 'mqtt') {
-            mqttConnect(commit, gw)
-        } else if (gw.app === 'm2m') {
-            m2mConnect(commit, gw)
+        window.backend.connect(gw.id, gw.host, gw.port, gw.topic)
+        connections[id] = {
+            commit,
+            connected: false
         }
     }
 }
 
 export function disconnect({ commit, state }, { id }) {
-    // console.log('gateway/disconnect', id)
+    // console.log('gateway/disconnect', id, connections)
     if (id in connections) {
-        connections[id].end()
+        if (connections[id].connected) {
+            window.backend.disconnect(id)
+        } else {
+            delete connections[id]
+        }
     }
 }
 
