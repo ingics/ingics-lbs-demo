@@ -11,12 +11,16 @@ LBS demonstration with iGSXX.
   - Support PlainText format
   - Support M2M Server or MQTT mode
 * A PC for compile and running this application
-  - Tested with Ubuntu 22, Node v20
+  - Tested with Ubuntu 22
+    - NodeJS v16.20.2
+    - NodeJS v18.19.1
+    - NodeJS v20.11.1
   - Quasar/Electron/NodeJS project should be runnable on Windows environment, but not officially tested
+* A MQTT broker if iGS01/iGS03 use MQTT transfer
 
 ### Install Quasar Cli
 This application is implemented using Quasar (v2) framework.
-You must install quasar cli first for running the project.
+You will need to install Quasar CLI for running the application.
 - https://quasar.dev/start/quasar-cli
 
 ### Install the dependencies
