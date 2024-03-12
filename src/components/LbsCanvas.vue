@@ -41,30 +41,7 @@
                     <v-text :config="item.label" />
                 </v-group>
             </v-layer>
-            <!-- <v-layer v-for="item in drawingGws" :key="item.id">
-                <v-group
-                    :config="item"
-                    @dblclick="launchGatewayConfig(item.id)"
-                >
-                    <v-circle v-if="beacon" :config="{
-                            x: item.icon.x,
-                            y: item.icon.y,
-                            radius: calSingalRadius(item.id),
-                            opacity: 0.5,
-                            scale: { x: 1, y: 1 },
-                            fillRadialGradientStartPoint: { x: 0, y: 0 },
-                            fillRadialGradientEndPoint: { x: 0, y: 0 },
-                            fillRadialGradientStartRadius: 10,
-                            fillRadialGradientEndRadius: calSingalRadius(item.id),
-                            fillRadialGradientColorStops: [
-                                0, item.signal.fillStart, 1, item.signal.fillEnd]
-                        }"
-                    />
-                    <v-circle :config="item.icon" />
-                    <v-text :config="item.label" />
-                </v-group>
-            </v-layer> -->
-            <!-- <v-layer>
+            <v-layer>
                 <v-star v-if="beacon" :config="{
                         x: cmToPixelX(beacon.x),
                         y: cmToPixelY(beacon.y),
@@ -76,7 +53,7 @@
                         draggable: false
                     }"
                 />
-            </v-layer> -->
+            </v-layer>
         </v-stage>
     </div>
 </template>
