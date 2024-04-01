@@ -69,50 +69,53 @@ $$D = 10^{(RssiRef_{1M} - RSSI)/20}$$
 
 Assume gateway location are ($x_1,y_1$), ($x_2,y_2$), ($x_3,y_3$), and the distance (calculated by RSSI) between beacon and gateways are $d_1,d_2,d_3$. Formula for gateway $i$ will be:
 
-> $(x-x_i)^2+(y-y_i)^2=d_i^2$
->
-> $\rightarrow x^2 - 2xx_i + x_i^2 + y^2 - 2yy_i + y_i^2 = d_i^2$
+$$(x-x_i)^2+(y-y_i)^2=d_i^2$$
+
+$$\rightarrow x^2 - 2xx_i + x_i^2 + y^2 - 2yy_i + y_i^2 = d_i^2$$
 
 Combine the formula for two gateways $(i,j)$ will be
 
-> $d_i^2-d_j^2 = -2xx_i + 2xx_j + x_i^2 - x_j^2 - 2yy_i + 2yy_j + y_i^2 - y_j^2 $
->
-> $\rightarrow d_i^2-d_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = 2x(x_j - x_i) + 2y(y_j - y_i) $
+$$d_i^2-d_j^2 = -2xx_i + 2xx_j + x_i^2 - x_j^2 - 2yy_i + 2yy_j + y_i^2 - y_j^2 $$
 
-List formulas for $(d_1-d_2),(d_1-d_3),(d_2-d_3), and convert to matrix formula:
+$$\rightarrow d_i^2-d_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = 2x(x_j - x_i) + 2y(y_j - y_i) $$
 
-> $\begin{bmatrix}
+List formulas for $(d_1-d_2),(d_1-d_3),(d_2-d_3)$, and convert to matrix formula:
+
+```math
+\begin{bmatrix}
 2(x_2-x_1)&2(y_2-y_1)\\
 2(x_3-x_1)&2(y_3-y_1)\\
-2(x_3-x_2)&2(y_3-y_2)\\
-\end{bmatrix}$
-> $\begin{bmatrix}
+2(x_3-x_2)&2(y_3-y_2)
+\end{bmatrix}
+\begin{bmatrix}
 x\\
-y\\
-\end{bmatrix}$ =
-> $\begin{bmatrix}
+y
+\end{bmatrix} =
+\begin{bmatrix}
 d^2_1-d^2_2-x^2_1+x^2_2-y^2_1+y^2_2\\
 d^2_1-d^2_3-x^2_1+x^2_3-y^2_1+y^2_3\\
-d^2_2-d^2_2-x^2_2+x^2_2-y^2_2+y^2_2\\
-\end{bmatrix}$
+d^2_2-d^2_2-x^2_2+x^2_2-y^2_2+y^2_2
+\end{bmatrix}
+```
 
 Mark above foumla as
 
-> $Ax = b$
->
-> $\rightarrow x = A^tb$
->
-> $\rightarrow x = (A^TA)^{-1}A^Tb$
+$$Ax = b$$
+
+$$\rightarrow x = A^tb$$
+
+$$\rightarrow x = (A^TA)^{-1}A^Tb$$
+
 
 Simbols in above formula:
 
-> $A^T$: Transpose Matrix
->
-> $A^{-1}$: Inverse Matrix
->
-> $I$: Identity matrix ($AA^{-1}=I$)
->
-> $A^t$: Pseudo Inverse Matrix ($(A^TA)^{-1}A^T=A^t$)
+$$A^T: Transpose Matrix$$
+
+$$A^{-1}: Inverse Matrix$$
+
+$$I: Identity matrix (AA^{-1}=I)$$
+
+$$A^t: Pseudo Inverse Matrix ((A^TA)^{-1}A^T=A^t)$$
 
 The NodeJS <b>ml-matrix</b> package provides the methods for transpose matrix and inverse matrix, so, we can get the pseudo matrix and then find the result $[x,y]$.
 
